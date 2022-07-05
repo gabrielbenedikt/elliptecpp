@@ -72,9 +72,6 @@ const std::vector<std::string> error_msgs = {
 class elliptec {
 
 public:
-    /*!
-     * \brief Motor the contructor initializes variables and establishes the serial connection.
-     */
     elliptec(std::string devname = "", std::vector<uint8_t> inmids = std::vector<uint8_t>(0), bool dohome = true, bool freqsearch = true);
     ~elliptec();
 
@@ -96,6 +93,7 @@ public:
     std::vector<std::pair<uint8_t, uint8_t>> get_motor_current_curve(std::string addr, uint8_t motor_num);
     void isolate_device(std::string addr, uint8_t minutes);
     void home(std::string addr, std::string dir = "0");
+    void paddle_home(std::string addr, uint8_t paddle_num);
     void move_absolute(std::string addr, double pos);
     void move_relative(std::string addr, double pos);
     double get_home_offset(std::string addr);
@@ -126,7 +124,6 @@ private:
     const uint8_t CW = 0;
     const uint8_t CCW = 1;
 
-
     // Acceptable accuracy
     const double DEGERR = 0.1;
     const double MMERR = 0.05;
@@ -143,8 +140,7 @@ private:
     std::vector<std::string> mids;      //!< motor ids
     std::vector<ell_device> devices;
 
-
-    ell_response process_response();
+    ell_response process_response(std::string response = "");
     uint8_t parsestatus(std::string msg);
     std::string err2string(uint8_t code);
     
@@ -170,7 +166,6 @@ private:
     std::string us2hex(uint16_t i);
     std::string uc2hex(uint8_t i);
     std::string int2addr(uint8_t id);
-
 };
 
 #endif // ELLIPTEC_H
