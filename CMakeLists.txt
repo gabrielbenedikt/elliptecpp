@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
-   project(libelliptecc VERSION 0.1 DESCRIPTION "C++ Thorlabs elliptec library")
+   project(elliptecpp VERSION 0.1 DESCRIPTION "C++ Thorlabs elliptec library")
 
    set(CMAKE_BUILD_TYPE RELEASE)
    
@@ -24,35 +24,35 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
    
    find_package(Boost 1.70 REQUIRED COMPONENTS system)
 
-   add_library(libelliptecc SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp)
+   add_library(elliptecpp SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp)
    
-   set_target_properties(libelliptecc PROPERTIES VERSION ${PROJECT_VERSION})
-   set_target_properties(libelliptecc PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-   set_target_properties(libelliptecc PROPERTIES PUBLIC_HEADER include/elliptec.h)
+   set_target_properties(elliptecpp PROPERTIES VERSION ${PROJECT_VERSION})
+   set_target_properties(elliptecpp PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+   set_target_properties(elliptecpp PROPERTIES PUBLIC_HEADER include/elliptec.h)
 
-   target_include_directories(libelliptecc PRIVATE include)
-   target_include_directories(libelliptecc PRIVATE src)
+   target_include_directories(elliptecpp PRIVATE include)
+   target_include_directories(elliptecpp PRIVATE src)
    
    
    include(GNUInstallDirs)
    
-   install(TARGETS libelliptecc
+   install(TARGETS elliptecpp
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-    configure_file(elliptecc.pc.in elliptecc.pc @ONLY)
+    configure_file(elliptecpp.pc.in elliptecpp.pc @ONLY)
    
-   set_property(TARGET libelliptecc PROPERTY CXX_STANDARD 20)
+   set_property(TARGET elliptecpp PROPERTY CXX_STANDARD 20)
    
-   install(FILES ${CMAKE_BINARY_DIR}/elliptecc.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+   install(FILES ${CMAKE_BINARY_DIR}/elliptecpp.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
    
-   target_link_libraries(libelliptecc ${Boost_LIBRARIES})
+   target_link_libraries(elliptecpp ${Boost_LIBRARIES})
    
    include(CheckIPOSupported)
    check_ipo_supported(RESULT hasipo OUTPUT error)
    if( hasipo )
       message(STATUS "IPO / LTO enabled")
-      set_property(TARGET libelliptecc PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+      set_property(TARGET elliptecpp PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
    else()
       message(STATUS "IPO / LTO not supported: <${error}>")
    endif()
