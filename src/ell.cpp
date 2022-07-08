@@ -308,13 +308,16 @@ void elliptec::move_absolute(std::string addr, double pos) {
         msg += hstepstr;
 
         uint8_t retcnt = 0;
+        uint64_t steps = 0;
+        double ERR=0;
+        double retpos=0;
         while (retcnt < 5) {
-            uint64_t steps = 0;
+            steps=0;
+            retpos=0;
+            ERR=0;
             write(msg.data());
             ell_response ret = process_response();
             steps = hex2step(ret.data);
-            double ERR=0
-            double retpos=0;
             if (devintype("linear", devinfo_at_addr(addr)->type)) {
                 ERR = MMERR;
                 retpos = step2mm(addr, steps);
@@ -361,12 +364,15 @@ void elliptec::move_relative(std::string addr, double pos) {
         msg += hstepstr;
 
         uint8_t retcnt = 0;
+        uint64_t steps = 0;
+        double ERR=0;
+        double retpos=0;
         while (retcnt < 5) {
             write(msg.data());
             ell_response ret = process_response();
-            uint64_t steps = hex2step(ret.data);
-            double ERR=0
-            double retpos=0;
+            steps = hex2step(ret.data);
+            ERR=0;
+            retpos=0;
             if (devintype("linear", devinfo_at_addr(addr)->type)) {
                 ERR = MMERR;
                 retpos = step2mm(addr, steps);
