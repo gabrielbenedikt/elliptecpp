@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
    
    find_package(Boost 1.70 REQUIRED COMPONENTS system)
 
-   add_library(elliptecpp SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp)
+   add_library(elliptecpp SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp src/boost_serial.cpp)
    
    set_target_properties(elliptecpp PROPERTIES VERSION ${PROJECT_VERSION})
    set_target_properties(elliptecpp PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
