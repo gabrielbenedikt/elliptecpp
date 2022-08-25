@@ -1,9 +1,11 @@
 /*
  * File:   Boost_serial.cpp
- * Author: Terraneo Federico
+ * Author: Terraneo Federico, Peter Schiansky
  * Distributed under the Boost Software License, Version 1.0.
  * Created on September 12, 2009, 3:47 PM
  *
+ * v1.07: Fix for gcc12 (std::exchange in <utility>)
+ * 
  * v1.06: C++11 support
  *
  * v1.05: Fixed a bug regarding reading after a timeout (again).
