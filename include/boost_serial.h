@@ -10,6 +10,7 @@
 #define BOOST_SERIAL_H
 
 #include <stdexcept>
+#include <utility>
 #include <boost/utility.hpp>
 #include <boost/asio.hpp>
 
