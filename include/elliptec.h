@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 class timeout_exception;
 class Boost_serial;
@@ -75,7 +76,7 @@ const std::vector<std::string> error_msgs = {
 class elliptec {
 
 public:
-    elliptec(std::string devname = "", std::vector<uint8_t> inmids = std::vector<uint8_t>(0), bool dohome = true, bool freqsearch = true);
+    elliptec(const std::string devname, std::vector<uint8_t> inmids, const bool dohome = true, const bool freqsearch = true);
     ~elliptec();
 
     //serial

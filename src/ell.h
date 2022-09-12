@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 struct ell_device {
     std::string address;    //address of device on controller
@@ -72,7 +73,7 @@ const std::vector<std::string> error_msgs = {
 class elliptec {
 
 public:
-    elliptec(std::string devname = "", std::vector<uint8_t> inmids = std::vector<uint8_t>(0), bool dohome = true, bool freqsearch = true);
+    elliptec(const std::string devname, std::vector<uint8_t> inmids, const bool dohome = true, const bool freqsearch = true);
     ~elliptec();
 
 public:
@@ -130,7 +131,7 @@ private:
 
     // serial
     std::string query(const std::string &data);
-    Boost_serial *bserial;
+    std::unique_ptr<Boost_serial> bserial;
     std::string read();
     void write(const std::string &data);
     uint16_t _ser_timeout;

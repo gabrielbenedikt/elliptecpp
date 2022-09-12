@@ -1,16 +1,20 @@
 cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
    project(elliptecpp VERSION 0.1 DESCRIPTION "C++ Thorlabs elliptec library")
 
-   set(CMAKE_BUILD_TYPE RELEASE)
+   set(default_build_type "Release")
+      if(CMAKE_BUILD_TYPE STREQUAL "")
+         message(STATUS "Build type not specified. defaulting to '${default_build_type}")
+         set(CMAKE_BUILD_TYPE "${default_build_type}")
+      endif()
    
    if(NOT CMAKE_DEBUG_POSTFIX)
       set(CMAKE_DEBUG_POSTFIX d)
    endif()
    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      set(CMAKE_C_FLAGS "-Wall -Wextra -fPIC")
+      set(CMAKE_C_FLAGS "-Wall -Wextra -fPIC -z nodelete")
       set(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb -fPIC")
       set(CMAKE_C_FLAGS_RELEASE "-Werror -pipe -g -O3 -fPIC -march=native -fomit-frame-pointer -fno-signaling-nans -fno-trapping-math -ftree-vectorize -fopt-info-vec-missed=vec.opt")
-      set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC")
+      set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC -z nodelete")
       set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -ggdb -fPIC")
       set(CMAKE_CXX_FLAGS_RELEASE "-Werror -pipe -g -O3 -fPIC -march=native -fomit-frame-pointer -fno-signaling-nans -fno-trapping-math -ftree-vectorize -fopt-info-vec-missed=vec.opt")
    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
@@ -22,17 +26,21 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
       set(CMAKE_CXX_FLAGS_RELEASE "-Werror -pipe -g -O3 -fPIC -march=native -ipo -fomit-frame-pointer -fno-signaling-nans -fno-trapping-math -ftree-vectorize")
    endif()
    
-   find_package(Boost 1.70 REQUIRED COMPONENTS system)
+   find_package(Boost 1.70 REQUIRED COMPONENTS system program_options)
 
    add_library(elliptecpp SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp src/boost_serial.cpp)
+   add_executable(ell_rot src/ell_rot.cpp)
    
    set_target_properties(elliptecpp PROPERTIES VERSION ${PROJECT_VERSION})
    set_target_properties(elliptecpp PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
    set_target_properties(elliptecpp PROPERTIES PUBLIC_HEADER include/elliptec.h)
-
+   set_property(TARGET ell_rot PROPERTY CXX_STANDARD 20)
+   
+   target_link_libraries(ell_rot ${Boost_LIBRARIES} elliptecpp)
+   
    target_include_directories(elliptecpp PRIVATE include)
    target_include_directories(elliptecpp PRIVATE src)
-   
+   target_include_directories(ell_rot PUBLIC ${Boost_INCLUDE_DIR})
    
    include(GNUInstallDirs)
    

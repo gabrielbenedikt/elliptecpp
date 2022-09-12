@@ -3,10 +3,10 @@ exec_prefix=/usr/local
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
-Name: libelliptecc
+Name: elliptecpp
 Description: C++ Thorlabs elliptec library
 Version: 0.1
 
 Requires:
-Libs: -L${libdir} -lelliptecc
+Libs: -L${libdir} -lelliptecpp
 Cflags: -I${includedir}
