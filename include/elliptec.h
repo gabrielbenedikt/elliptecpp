@@ -1,13 +1,14 @@
 #ifndef ELLIPTEC_H
 #define ELLIPTEC_H
 
-#include "boost_serial.h"
+/*! \file */
 
-#include <boost/utility.hpp>
-#include <boost/asio.hpp>
+//#include "defines.h"
+#include "boost_serial.h"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <optional>
@@ -16,9 +17,6 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-
-class timeout_exception;
-class Boost_serial;
 
 struct ell_device {
     std::string address;    //address of device on controller
@@ -76,7 +74,7 @@ const std::vector<std::string> error_msgs = {
 class elliptec {
 
 public:
-    elliptec(const std::string devname, std::vector<uint8_t> inmids, const bool dohome = true, const bool freqsearch = true);
+    elliptec(const std::string devname, const std::vector<uint8_t> inmids, const bool dohome = true, const bool freqsearch = true);
     ~elliptec();
 
     //serial
@@ -121,6 +119,59 @@ public:
     
     void command_moveboth(int hwp_mnum, int qwp_mnum, double hwpang, double qwpang); //!TODO: remove
     void command_movethree(int hwp_mnum, int qwp_mnum, int qwp2_mnum, double hwpang, double qwpang, double qwp2ang); //!TODO: remove
+
+private:
+    bool _dofreqsearch;
+    bool _dohome;
+    std::vector<uint8_t> _inmids;
+    std::string _devname;
+    
+    // Direction constants
+    static const uint8_t CW = 0;
+    static const uint8_t CCW = 1;
+
+    // Acceptable accuracy
+    static constexpr double DEGERR = 0.1;
+    static constexpr double MMERR = 0.05;
+
+    // serial
+    std::string query(const std::string &data);
+    std::unique_ptr<Boost_serial> bserial;
+    std::string read();
+    void write(const std::string &data);
+    uint16_t _ser_timeout;
+
+    std::unordered_map<std::string, std::vector<uint8_t>> devtype;
+
+    std::vector<std::string> mids;      //!< motor ids
+    std::vector<ell_device> devices;
+
+    ell_response process_response(std::string response = "");
+    uint8_t parsestatus(std::string msg);
+    std::string err2string(uint8_t code);
+    
+    void handle_devinfo(ell_device dev);
+    void print_dev_info(ell_device dev);
+
+    void search_motor_freq(std::string addr, uint8_t motor_num);
+    
+    bool devintype(std::string type, uint8_t id);
+    bool devislinrot(std::string addr);
+    bool devislinear(std::string addr);
+    bool devisrotary(std::string addr);
+    bool devispaddle(std::string addr);
+    bool devispiezo(std::string addr);
+    std::optional<ell_device> devinfo_at_addr(std::string addr);
+    int64_t deg2step(std::string addr, double deg);
+    int64_t mm2step(std::string addr, double mm);
+    double step2deg(std::string addr, int64_t step);
+    double step2mm(std::string addr, int64_t step);
+    std::string step2hex(int64_t step, uint8_t width = 8);
+    int64_t hex2step(std::string hex);
+    std::string ll2hex(int64_t i);
+    std::string us2hex(uint16_t i);
+    std::string uc2hex(uint8_t i);
+    std::string int2addr(uint8_t id);
 };
 
 #endif // ELLIPTEC_H

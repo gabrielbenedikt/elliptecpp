@@ -63,8 +63,10 @@ int main(int argc, char **argv) {
     }
     std::vector<uint8_t> mnumvec(1,mnum);
     
-    elliptec dev = elliptec(devname, mnumvec);
-    
+    /*
+     * rotate 
+     */
+    elliptec dev = elliptec(devname, mnumvec, false, false);
     dev.move_absolute(std::to_string(mnum), angle);
         
     dev.close();

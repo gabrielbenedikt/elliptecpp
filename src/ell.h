@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <optional>
@@ -73,10 +74,9 @@ const std::vector<std::string> error_msgs = {
 class elliptec {
 
 public:
-    elliptec(const std::string devname, std::vector<uint8_t> inmids, const bool dohome = true, const bool freqsearch = true);
+    elliptec(const std::string devname, const std::vector<uint8_t> inmids, const bool dohome = true, const bool freqsearch = true);
     ~elliptec();
 
-public:
     //serial
     void open(std::string port, bool dohome, bool freqsearch);
     void close();
@@ -121,13 +121,18 @@ public:
     void command_movethree(int hwp_mnum, int qwp_mnum, int qwp2_mnum, double hwpang, double qwpang, double qwp2ang); //!TODO: remove
 
 private:
+    bool _dofreqsearch;
+    bool _dohome;
+    std::vector<uint8_t> _inmids;
+    std::string _devname;
+    
     // Direction constants
-    const uint8_t CW = 0;
-    const uint8_t CCW = 1;
+    static const uint8_t CW = 0;
+    static const uint8_t CCW = 1;
 
     // Acceptable accuracy
-    const double DEGERR = 0.1;
-    const double MMERR = 0.05;
+    static constexpr double DEGERR = 0.1;
+    static constexpr double MMERR = 0.05;
 
     // serial
     std::string query(const std::string &data);

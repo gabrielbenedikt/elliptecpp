@@ -19,8 +19,12 @@ void print_vec(std::vector<T> v) {
     std::cout << std::endl;
 }
 
-elliptec::elliptec(const std::string devname, std::vector<uint8_t> inmids, const bool dohome, const bool freqsearch)
+elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids, const bool dohome, const bool freqsearch) : _inmids{std::move(inmids)}, _devname(devname)
 {
+     std::cout << "in constructor" << std::endl;
+    _dohome = dohome;
+    _dofreqsearch = freqsearch;
+    
     std::cout << "in constructor" << std::endl;
     devtype["rotary"] = {8, 14, 18};
     devtype["linear"] = {7, 10, 17, 20};
@@ -31,22 +35,17 @@ elliptec::elliptec(const std::string devname, std::vector<uint8_t> inmids, const
     devtype["piezo"] = {5};
 
     _ser_timeout = 5;
-    /*
-    std::string estr = inmids.empty() ? "inmids is empty" : "inmids contains elements";
-    std::cout << estr << std::endl;
     
-    std::cout << "print inmids: " << std::endl;
-    print_vec(inmids);
-    */
-    std::cout << "size of inmids: " << inmids.size() << std::endl;
-    if (inmids.size() > 1) {
-        std::sort(inmids.begin(), inmids.end());
+    std::cout << "size of _inmids: " << _inmids.size() << std::endl;
+    if (_inmids.size() > 1) {
+        std::sort(_inmids.begin(), _inmids.end());
     }
     
-    std::cout << "print inmids after sort: " << std::endl;
-    print_vec(inmids);
+    std::cout << "print _inmids after sort: " << std::endl;
+    print_vec(_inmids);
     
-    for (uint8_t id: inmids) {
+    mids.reserve(_inmids.size());
+    for (uint8_t id: _inmids) {
         if (id > 15) {
             std::cout << "ERROR: elliptec motor id has to be 0 < id < 15" << std::endl;
         } else {
@@ -54,8 +53,6 @@ elliptec::elliptec(const std::string devname, std::vector<uint8_t> inmids, const
         }
     }
     
-    //estr = mids.empty() ? "mids is empty" : "mids contains elements";
-    //std::cout << estr << std::endl;
     
     std::cout << "print mids: " << std::endl;
     print_vec(mids);
@@ -65,14 +62,14 @@ elliptec::elliptec(const std::string devname, std::vector<uint8_t> inmids, const
     }
     std::cout  << "";
 
-    bserial = std::unique_ptr<Boost_serial>(new Boost_serial(devname, 9600,
+    bserial = std::unique_ptr<Boost_serial>(new Boost_serial(_devname, 9600,
                                boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none),
                                boost::asio::serial_port_base::character_size(8),
                                boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none),
                                boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one)));
     bserial->setTimeout(boost::posix_time::seconds(_ser_timeout));
 
-    open(devname, dohome, freqsearch);
+    open(_devname, _dohome, _dofreqsearch);
     
     for (auto m: mids) {
         get_info(m);
@@ -83,8 +80,6 @@ elliptec::~elliptec()
 {
     std::cout << "in destructor" << std::endl;
     bserial->close();
-//     std::cout << "delete" << std::endl;
-//     delete bserial;
     std::cout << "end" << std::endl;
 }
 
