@@ -78,7 +78,7 @@ public:
     ~elliptec();
 
     //serial
-    void open(std::string port, bool dohome, bool freqsearch);
+    void open(std::string port);
     void close();
     bool isopen();
 
@@ -125,6 +125,8 @@ private:
     bool _dohome;
     std::vector<uint8_t> _inmids;
     std::string _devname;
+    double _current_pos;
+
     
     // Direction constants
     static const uint8_t CW = 0;

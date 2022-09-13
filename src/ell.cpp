@@ -25,7 +25,6 @@ elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids,
     _dohome = dohome;
     _dofreqsearch = freqsearch;
     
-    std::cout << "in constructor" << std::endl;
     devtype["rotary"] = {8, 14, 18};
     devtype["linear"] = {7, 10, 17, 20};
     devtype["linrot"] = {7, 8, 10, 14, 17, 18, 20};
@@ -67,13 +66,22 @@ elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids,
                                boost::asio::serial_port_base::character_size(8),
                                boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none),
                                boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one)));
-    bserial->setTimeout(boost::posix_time::seconds(_ser_timeout));
+    bserial->setTimeout(boost::posix_time::seconds(30));
 
-    open(_devname, _dohome, _dofreqsearch);
+    open(_devname);
     
-    for (auto m: mids) {
-        get_info(m);
+    for (std::string id : mids) {
+        get_info(id);
+        if (freqsearch) {
+            search_freq(id);
+            //save_userdata(id);
+        }
+        if (dohome) {
+            home(id);
+        }
+        get_position(id);
     }
+    bserial->setTimeout(boost::posix_time::seconds(_ser_timeout));
 }
 
 elliptec::~elliptec()
@@ -142,9 +150,11 @@ ell_response elliptec::process_response(std::string response) {
         if (devislinear(addstr)) {
             pos = step2mm(addstr, step);
             std::cout << pos << "mm" << std::endl;
+            _current_pos = pos;
         } else if (devisrotary(addstr)) {
             pos = step2deg(addstr, step);
             std::cout << pos << "deg" << std::endl;
+            _current_pos = pos;
         } 
     } else if ((!command.compare(std::string("P1"))) || (!command.compare(std::string("P2"))) || (!command.compare(std::string("P3")))) {
         uint8_t pnum = std::stoi(command.substr(1,1).data(), nullptr, 10);
@@ -424,12 +434,14 @@ void elliptec::move_relative(std::string addr, double pos) {
     if (hstepstr == "") {
         std::cout << "something went wrong in move_relative" << std::endl;
     } else {
+        get_position(addr);
         msg += hstepstr;
 
         uint8_t retcnt = 0;
         uint64_t steps = 0;
-        double ERR=0;
-        double retpos=0;
+        double ERR = 0;
+        double retpos = 0;
+        double oldpos = _current_pos;
         while (retcnt < 5) {
             write(msg.data());
             ell_response ret = process_response();
@@ -443,11 +455,11 @@ void elliptec::move_relative(std::string addr, double pos) {
                 ERR = DEGERR;
                 retpos = step2deg(addr, steps);
             }
-            if (std::abs(pos-retpos) > ERR) {
-                std::cout << "ERROR: rotation failed: moved " << retpos << " while trying to move " << pos<< std::endl;
+            if (std::abs(retpos-oldpos-pos) > ERR) {
+                std::cout << "ERROR: rotation failed: moved " << retpos-oldpos << " while trying to move " << pos<< std::endl;
                 ++retcnt;
             } else {
-                std::cout << "rotation succeeded: moved " << retpos << " while trying to move " << pos  << std::endl;
+                std::cout << "rotation succeeded: moved " << retpos-oldpos << " while trying to move " << pos  << std::endl;
                 retcnt = 5;
             }
         }
