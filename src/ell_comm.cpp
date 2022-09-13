@@ -42,7 +42,7 @@ bool elliptec::isopen()
     return bserial->isOpen();
 }
 
-void elliptec::open(std::string port, bool dohome, bool freqsearch) {
+void elliptec::open(std::string port) {
     std::cout << "in open" << std::endl;
     if (!bserial->isOpen()) {
         try {
@@ -54,16 +54,5 @@ void elliptec::open(std::string port, bool dohome, bool freqsearch) {
          }  catch (std::exception & ex) {
              std::cout << ex.what() << std::endl;
          }
-
-        for (std::string id : mids) {
-            get_info(id);
-            if (freqsearch) {
-                search_freq(id);
-                save_userdata(id);
-            }
-            if (dohome) {
-                home(id);
-            }
-        }
     }
 }
