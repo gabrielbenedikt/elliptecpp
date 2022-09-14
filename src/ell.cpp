@@ -651,7 +651,6 @@ void elliptec::change_address(std::string addr, std::string newaddr) {
         }
     }
     if (!found) {
-        std::cout << "in change_address" << std::endl;
         std::string msg = addr + "ca" + newaddr;
         write(msg.data());
         process_response();
