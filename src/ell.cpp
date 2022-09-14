@@ -521,6 +521,7 @@ void elliptec::set_home_offset(std::string addr, double offset) {
     }
     std::string msg = addr + "so" + hexoffset;
     write(msg.data());
+    process_response();
     //no response ?
 }
 
@@ -560,6 +561,7 @@ void elliptec::set_jogstep_size(std::string addr, double jss) {
     }
     std::string msg = addr + "sj" + hexjss;
     write(msg.data());
+    process_response();
     //no response ?
 }
 
@@ -614,6 +616,7 @@ void elliptec::set_velocity(std::string addr, uint8_t percent) {
     std::cout << "in set_velocity" << std::endl;
     std::string msg = addr + "sv" + uc2hex(percent);
     write(msg.data());
+    process_response();
     //no reply?
 }
 
