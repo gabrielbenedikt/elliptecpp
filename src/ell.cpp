@@ -133,10 +133,8 @@ ell_response elliptec::process_response(std::string response) {
     std::cout << "addstr: " << addstr << "\n";
     std::cout << "Command: " << command << "\n";
     std::cout << "data: " << data << std::endl;
-    std::cout << "compare to GS" << command.compare(std::string("GS")) << std::endl;
     
     if (!command.compare(std::string("GS"))) {
-        std::cout << "1111111" << std::endl;
         std::cout << "got status " << ret.data << std::endl;
         uint8_t code = parsestatus(response);
         if (code!=0) {
