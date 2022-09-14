@@ -1,27 +1,7 @@
 #include "ell.h"
 
-template<typename T>
-void print_vec(std::vector<T> v) {
-    std::cout << "vector: " << std::endl;
-    for (auto e: v) {
-        std::cout << e << ", ";
-    }
-    std::cout << std::endl;
-}
-
-template<typename T>
-requires std::is_unsigned<T>::value
-void print_vec(std::vector<T> v) {
-    std::cout << "vector u:" << std::endl;
-    for (auto e: v) {
-        std::cout << unsigned(e) << ", ";
-    }
-    std::cout << std::endl;
-}
-
 elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids, const bool dohome, const bool freqsearch) : _inmids{std::move(inmids)}, _devname(devname)
 {
-     std::cout << "in constructor" << std::endl;
     _dohome = dohome;
     _dofreqsearch = freqsearch;
     
@@ -35,13 +15,9 @@ elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids,
 
     _ser_timeout = 5;
     
-    std::cout << "size of _inmids: " << _inmids.size() << std::endl;
     if (_inmids.size() > 1) {
         std::sort(_inmids.begin(), _inmids.end());
     }
-    
-    std::cout << "print _inmids after sort: " << std::endl;
-    print_vec(_inmids);
     
     mids.reserve(_inmids.size());
     for (uint8_t id: _inmids) {
@@ -52,15 +28,6 @@ elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids,
         }
     }
     
-    
-    std::cout << "print mids: " << std::endl;
-    print_vec(mids);
-
-    for (std::string m : mids) {
-        std::cout << m << std::endl;
-    }
-    std::cout  << "";
-
     bserial = std::unique_ptr<Boost_serial>(new Boost_serial(_devname, 9600,
                                boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none),
                                boost::asio::serial_port_base::character_size(8),
@@ -86,13 +53,10 @@ elliptec::elliptec(const std::string devname, const std::vector<uint8_t> inmids,
 
 elliptec::~elliptec()
 {
-    std::cout << "in destructor" << std::endl;
     bserial->close();
-    std::cout << "end" << std::endl;
 }
 
 std::optional<ell_device> elliptec::devinfo_at_addr(std::string addr) {
-    std::cout << "in devinfo_at_addr" << std::endl;
     std::cout << "number of connected devices: " << devices.size() << std::endl;
     for (ell_device d : devices) {
         if (d.address == addr) {
@@ -103,7 +67,6 @@ std::optional<ell_device> elliptec::devinfo_at_addr(std::string addr) {
 }
 
 void elliptec::handle_devinfo(ell_device dev) {
-    std::cout << "in handle_devinfo" << std::endl;
     bool is_new_dev = true;
     for (ell_device d : devices) {
         if (d.serial == dev.serial) {
@@ -116,7 +79,6 @@ void elliptec::handle_devinfo(ell_device dev) {
 }
 
 ell_response elliptec::process_response(std::string response) {
-    std::cout << "in process_response" << std::endl;
     if (!response.compare("")) {
         response = read();
     }
@@ -129,13 +91,8 @@ ell_response elliptec::process_response(std::string response) {
     ret.address = addr;
     ret.type = command;
     ret.data = data;
-
-    std::cout << "addstr: " << addstr << "\n";
-    std::cout << "Command: " << command << "\n";
-    std::cout << "data: " << data << std::endl;
     
     if (!command.compare(std::string("GS"))) {
-        std::cout << "got status " << ret.data << std::endl;
         uint8_t code = parsestatus(response);
         if (code!=0) {
             std::string errstring = err2string(code);
@@ -187,7 +144,6 @@ ell_response elliptec::process_response(std::string response) {
  *
  *****************************************/
 void elliptec::get_info(std::string addr){
-    std::cout << "in get_info" << std::endl;
     std::string msg = addr + "in";
     write(msg.data());
     
@@ -217,7 +173,6 @@ void elliptec::get_info(std::string addr){
 }
 
 void elliptec::get_motor_info(std::string addr, uint8_t motor_num){
-    std::cout << "in get_motor_info" << std::endl;
     if ((motor_num > 3) || (motor_num < 1)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     } 
@@ -250,7 +205,6 @@ void elliptec::get_motor_info(std::string addr, uint8_t motor_num){
 }
 
 void elliptec::set_motor_freq(std::string addr, std::string dir, uint8_t motor_num, uint16_t freq_khz, bool factory_reset){
-    std::cout << "in set_motor_freq" << std::endl;
     std::string msg = addr;
     if ((motor_num > 3) || (motor_num < 1)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
@@ -281,7 +235,6 @@ void elliptec::set_motor_freq(std::string addr, std::string dir, uint8_t motor_n
 }
 
 void elliptec::search_motor_freq(std::string addr, uint8_t motor_num){
-    std::cout << "in search_motor_freq" << std::endl;
     if ((motor_num > 3) || (motor_num < 1)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     } 
@@ -297,7 +250,6 @@ void elliptec::search_motor_freq(std::string addr, uint8_t motor_num){
 }
 
 void elliptec::scan_motor_current_curve(std::string addr, uint8_t motor_num) {
-    std::cout << "in scan_motor_current_curve" << std::endl;
     if ((motor_num > 3) || (motor_num < 1)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     }
@@ -308,7 +260,6 @@ void elliptec::scan_motor_current_curve(std::string addr, uint8_t motor_num) {
 }
 
 std::vector<std::pair<uint8_t, uint8_t>> elliptec::get_motor_current_curve(std::string addr, uint8_t motor_num) {
-    std::cout << "in get_motor_current_curve" << std::endl;
     if ((motor_num > 3) || (motor_num < 1)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     }
@@ -338,14 +289,12 @@ std::vector<std::pair<uint8_t, uint8_t>> elliptec::get_motor_current_curve(std::
 }
 
 void elliptec::isolate_device(std::string addr, uint8_t minutes){
-    std::cout << "in isolate_device" << std::endl;
     std::string msg = addr + "is" + uc2hex(minutes);
     write(msg.data());
     //no response
 }
 
 void elliptec::home(std::string addr, std::string dir) {
-    std::cout << "in home" << std::endl;
     std::string msg = addr + "ho" + dir;
     write(msg.data());
     process_response();
@@ -353,7 +302,6 @@ void elliptec::home(std::string addr, std::string dir) {
 }
 
 void elliptec::paddle_home(std::string addr, uint8_t paddle_num) {
-    std::cout << "in paddle_home" << std::endl;
     if ((paddle_num < 1) || (paddle_num > 7)) {
         throw std::invalid_argument("Paddle specifyer has to be 1...7");
     } else {
@@ -369,7 +317,6 @@ void elliptec::paddle_home(std::string addr, uint8_t paddle_num) {
 // ell_response ret = process_response() is returning a position. 
 // Harden.
 void elliptec::move_absolute(std::string addr, double pos) {
-    std::cout << "in move_absolute" << std::endl;
     std::string msg = addr + "ma";
     std::string hstepstr = "";
     auto dev = devinfo_at_addr(addr);
@@ -426,7 +373,6 @@ void elliptec::move_absolute(std::string addr, double pos) {
 // ell_response ret = process_response() is returning a position. 
 // Harden.
 void elliptec::move_relative(std::string addr, double pos) {
-    std::cout << "in move_relative" << std::endl;
     std::string msg = addr + "mr";
     std::string hstepstr = "";
     auto dev = devinfo_at_addr(addr);
@@ -482,7 +428,6 @@ void elliptec::move_relative(std::string addr, double pos) {
 
 
 double elliptec::get_home_offset(std::string addr) {
-    std::cout << "in get_home_offset" << std::endl;
     auto dev = devinfo_at_addr(addr);
     if (dev.has_value()){
         if (!devintype("linrot", dev.value().type)) {
@@ -510,7 +455,6 @@ double elliptec::get_home_offset(std::string addr) {
 }
 
 void elliptec::set_home_offset(std::string addr, double offset) {
-    std::cout << "in set_home_offset" << std::endl;
     std::string hexoffset = "";
     if (devislinear(addr)) {
         hexoffset = step2hex(mm2step(addr, offset));
@@ -526,7 +470,6 @@ void elliptec::set_home_offset(std::string addr, double offset) {
 }
 
 double elliptec::get_jogstep_size(std::string addr) {
-    std::cout << "in get_jogstep_size" << std::endl;
     if (!devislinrot(addr)) {
         throw std::invalid_argument("Only linear and rotary devices support home offset");
     }
@@ -550,7 +493,6 @@ double elliptec::get_jogstep_size(std::string addr) {
 }
 
 void elliptec::set_jogstep_size(std::string addr, double jss) {
-    std::cout << "in set_jogstep_size" << std::endl;
     std::string hexjss = "";
     if (devislinear(addr)) {
         hexjss = step2hex(mm2step(addr, jss));
@@ -566,7 +508,6 @@ void elliptec::set_jogstep_size(std::string addr, double jss) {
 }
 
 void elliptec::move_fwd(std::string addr){
-    std::cout << "in move_fwd" << std::endl;
     std::string msg = addr + "fw";
     write(msg.data());
     process_response();
@@ -574,7 +515,6 @@ void elliptec::move_fwd(std::string addr){
 }
 
 void elliptec::move_bwd(std::string addr){
-    std::cout << "in move_bwd" << std::endl;
     std::string msg = addr + "bw";
     write(msg.data());
     process_response();
@@ -582,7 +522,6 @@ void elliptec::move_bwd(std::string addr){
 }
 
 void elliptec::stop(std::string addr){
-    std::cout << "in stop" << std::endl;
     std::string msg = addr + "ms";
     write(msg.data());
     process_response();
@@ -590,7 +529,6 @@ void elliptec::stop(std::string addr){
 }
 
 void elliptec::get_position(std::string addr) {
-    std::cout << "in get_position" << std::endl;
     std::string msg = addr + "gp";
     write(msg.data());
     process_response();
@@ -598,7 +536,6 @@ void elliptec::get_position(std::string addr) {
 }
 
 uint8_t elliptec::get_velocity(std::string addr) {
-    std::cout << "in get_velocity" << std::endl;
     std::string msg = addr + "gv";
     write(msg.data());
     uint8_t percent = 0;
@@ -613,7 +550,6 @@ uint8_t elliptec::get_velocity(std::string addr) {
 }
 
 void elliptec::set_velocity(std::string addr, uint8_t percent) {
-    std::cout << "in set_velocity" << std::endl;
     std::string msg = addr + "sv" + uc2hex(percent);
     write(msg.data());
     process_response();
@@ -621,7 +557,6 @@ void elliptec::set_velocity(std::string addr, uint8_t percent) {
 }
 
 void elliptec::groupaddress(std::string addr, std::string groupaddr) {
-    std::cout << "in groupaddress" << std::endl;
     std::string msg = addr + "ga" + groupaddr;
     write(msg.data());
     process_response();
@@ -629,7 +564,6 @@ void elliptec::groupaddress(std::string addr, std::string groupaddr) {
 }
 
 void elliptec::paddle_drivetime(std::string addr, uint8_t padnum, uint16_t ms, std::string direction){
-    std::cout << "in paddle_drivetime" << std::endl;
     if ((padnum < 1) || (padnum > 3)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     }
@@ -650,7 +584,6 @@ void elliptec::paddle_drivetime(std::string addr, uint8_t padnum, uint16_t ms, s
 }
 
 void elliptec::paddle_moveabsolute(std::string addr, uint8_t padnum, double deg){
-    std::cout << "in paddle_moveabsolute" << std::endl;
     if ((padnum < 1) || (padnum > 3)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     }
@@ -665,7 +598,6 @@ void elliptec::paddle_moveabsolute(std::string addr, uint8_t padnum, double deg)
 }
 
 void elliptec::paddle_moverelative(std::string addr, uint8_t padnum, double deg){
-    std::cout << "in paddle_moverelative" << std::endl;
     if ((padnum < 1) || (padnum > 3)) {
         throw std::invalid_argument("motor_num has to be 1, 2 or 3");
     }
@@ -680,14 +612,12 @@ void elliptec::paddle_moverelative(std::string addr, uint8_t padnum, double deg)
 }
 
 void elliptec::save_userdata(std::string addr) {
-    std::cout << "in save_userdata" << std::endl;
     std::string msg = addr + "us";
     write(msg.data());
     process_response();
 }
 
 void elliptec::optimize_motors(std::string addr) {
-    std::cout << "in optimize_motors" << std::endl;
     std::string msg = addr + "om";
     write(msg.data());
     bserial->setTimeout(boost::posix_time::seconds(0));
@@ -697,7 +627,6 @@ void elliptec::optimize_motors(std::string addr) {
 }
 
 void elliptec::clean_mechanics(std::string addr) {
-    std::cout << "in clean_mechanics" << std::endl;
     std::string msg = addr + "cm";
     write(msg.data());
     bserial->setTimeout(boost::posix_time::seconds(0));
@@ -707,7 +636,6 @@ void elliptec::clean_mechanics(std::string addr) {
 }
 
 void elliptec::stop_clean(std::string addr) {
-    std::cout << "in stop_clean" << std::endl;
     std::string msg = addr + "st";
     write(msg.data());
     process_response();
@@ -745,7 +673,6 @@ void elliptec::change_address(std::string addr, std::string newaddr) {
 }
 
 void elliptec::get_status(std::string addr) {
-    std::cout << "in get_status" << std::endl;
     std::string msg = addr + "gs";
     write(msg.data());
     process_response();
@@ -753,7 +680,6 @@ void elliptec::get_status(std::string addr) {
 }
 
 void elliptec::energize_motor(std::string addr, double freq_hz){
-    std::cout << "in energize_motor" << std::endl;
     if (!devispiezo(addr)) {
         throw std::invalid_argument("only piezo ELL5 can be energized");
     }
@@ -769,7 +695,6 @@ void elliptec::energize_motor(std::string addr, double freq_hz){
 }
 
 void elliptec::halt_motor(std::string addr) {
-    std::cout << "in halt_motor" << std::endl;
     if (!devispiezo(addr)) {
         throw std::invalid_argument("only piezo ELL5 can halt");
     }
@@ -786,7 +711,6 @@ void elliptec::halt_motor(std::string addr) {
  *
  *****************************************/
 void elliptec::search_freq(std::string addr) {
-    std::cout << "in search_freq" << std::endl;
     auto dev = devinfo_at_addr(addr);
     if (dev.has_value()){
         if (devintype("indexed", dev.value().type)) {
@@ -801,13 +725,11 @@ void elliptec::search_freq(std::string addr) {
 }
 
 void elliptec::command_moveboth(int hwp_mnum, int qwp_mnum, double hwpang, double qwpang){
-    std::cout << "in command_moveboth" << std::endl;
     move_absolute(int2addr(hwp_mnum), std::fmod(hwpang, 360));
     move_absolute(int2addr(qwp_mnum), std::fmod(qwpang, 360));
 }
 
 void elliptec::command_movethree(int hwp_mnum, int qwp_mnum, int qwp2_mnum, double hwpang, double qwpang, double qwp2ang){
-    std::cout << "in command_movethree" << std::endl;
     move_absolute(int2addr(hwp_mnum), std::fmod(hwpang, 360));
     move_absolute(int2addr(qwp_mnum), std::fmod(qwpang, 360));
     move_absolute(int2addr(qwp2_mnum), std::fmod(qwp2ang, 360));

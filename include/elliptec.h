@@ -78,7 +78,7 @@ public:
     ~elliptec();
 
     //serial
-    void open(std::string port, bool dohome, bool freqsearch);
+    void open(std::string port);
     void close();
     bool isopen();
 
@@ -117,6 +117,9 @@ public:
     void energize_motor(std::string addr, double freq);
     void halt_motor(std::string addr);
     
+    void print_addr_info(std::string addr);
+    void cr();
+    void lf();
     void command_moveboth(int hwp_mnum, int qwp_mnum, double hwpang, double qwpang); //!TODO: remove
     void command_movethree(int hwp_mnum, int qwp_mnum, int qwp2_mnum, double hwpang, double qwpang, double qwp2ang); //!TODO: remove
 
@@ -125,6 +128,8 @@ private:
     bool _dohome;
     std::vector<uint8_t> _inmids;
     std::string _devname;
+    double _current_pos;
+
     
     // Direction constants
     static const uint8_t CW = 0;
@@ -152,6 +157,7 @@ private:
     
     void handle_devinfo(ell_device dev);
     void print_dev_info(ell_device dev);
+    
 
     void search_motor_freq(std::string addr, uint8_t motor_num);
     
