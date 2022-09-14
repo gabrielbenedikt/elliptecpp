@@ -154,6 +154,21 @@ ell_response elliptec::process_response(std::string response) {
             std::cout << pos << "deg" << std::endl;
             _current_pos = pos;
         } 
+    } else if (!command.compare(std::string("GJ"))) {
+        auto dev = devinfo_at_addr(addstr);
+        int64_t step = hex2step(ret.data);
+        double jogsize = 0;
+        if (devislinear(addstr)) {
+            jogsize = step2mm(addstr, step);
+            std::cout << "jogsize: " << jogsize << "mm" << std::endl;
+        } else if (devisrotary(addstr)) {
+            jogsize = step2deg(addstr, step);
+            std::cout << "jogsize: " << jogsize << "deg" << std::endl;
+        } 
+    } else if (!command.compare(std::string("GV"))) {
+        auto dev = devinfo_at_addr(addstr);
+        uint64_t percent = hex2step(ret.data);
+        std::cout << "speed: " << percent << "%" << std::endl; 
     } else if ((!command.compare(std::string("P1"))) || (!command.compare(std::string("P2"))) || (!command.compare(std::string("P3")))) {
         uint8_t pnum = std::stoi(command.substr(1,1).data(), nullptr, 10);
         
