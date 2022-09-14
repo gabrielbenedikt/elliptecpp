@@ -136,10 +136,30 @@ void elliptec::print_dev_info(ell_device dev) {
     std::cout << "pulses per unit: " << dev.pulses << std::endl;
 }
 
+void elliptec::print_addr_info(std::string addr) {
+    bool found = false;
+    for (auto dev: devices){
+        if (dev.address == addr) {
+            found = true;
+            std::cout << "motor address: " << dev.address << std::endl;
+            std::cout << "device type: " << dev.type << std::endl;
+            std::cout << "serial number: " << dev.serial << std::endl;
+            std::cout << "manufacturing year: " << dev.year << std::endl;
+            std::cout << "fw revision: " << (unsigned)dev.fw << std::endl;
+            std::cout << "hw revision: " << (unsigned)dev.hw << std::endl;
+            std::cout << "travel: " << dev.travel << std::endl;
+            std::cout << "pulses per unit: " << dev.pulses << std::endl;
+        }
+    }
+    if (!found) {
+        std::cout << "Device with address " << addr << " not found" << std::endl;
+    }
+}
+
 uint8_t elliptec::parsestatus(std::string msg) {
     uint8_t code = 0;
-    if (msg.substr(1,2).compare(std::string("GS"))) {
-        code = std::stoi(msg.substr(3,2));
+    if (!msg.substr(1,2).compare(std::string("GS"))) {
+        code = hex2step(msg.substr(3,2));
     }
     return code;
 }
