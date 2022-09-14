@@ -715,12 +715,33 @@ void elliptec::stop_clean(std::string addr) {
 }
 
 void elliptec::change_address(std::string addr, std::string newaddr) {
-    std::cout << "in change_address" << std::endl;
-    std::string msg = addr + "ca" + newaddr;
-    write(msg.data());
-    process_response();
-    //reply with GS
-    save_userdata(addr);
+    bool found = false;
+    for (auto dev: devices) {
+        if (dev.address == newaddr) {
+            std::cout << "Error: new address " << newaddr << " already in use" << std::endl;
+            found = true;
+        }
+    }
+    if (!found) {
+        std::cout << "in change_address" << std::endl;
+        std::string msg = addr + "ca" + newaddr;
+        write(msg.data());
+        process_response();
+        save_userdata(newaddr);
+        for (auto &dev:devices) { 
+            if (dev.address==addr) {
+                dev.address=newaddr;
+            }
+        }
+        for (auto &dev: devices) {
+            print_dev_info(dev);
+        }
+        for (size_t i=0; i< mids.size(); ++i) {
+            if (mids.at(i) == addr) {
+                mids.at(i) = newaddr;
+            }
+        }
+    }
 }
 
 void elliptec::get_status(std::string addr) {
