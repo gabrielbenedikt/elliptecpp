@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     /*
      * rotate 
      */
-    elliptec dev = elliptec(devname, mnumvec, false, false);
+    elliptec dev = elliptec(devname, mnumvec, true, true);
     dev.move_absolute(std::to_string(mnum), angle);
         
     dev.close();
