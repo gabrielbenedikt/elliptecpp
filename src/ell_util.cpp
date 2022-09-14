@@ -118,7 +118,7 @@ std::string elliptec::us2hex(uint16_t i) {
 
 std::string elliptec::uc2hex(uint8_t i) {
     std::stringstream ss;
-    ss << std::setfill ('0') << std::setw(2) << std::hex << i;
+    ss << std::setfill ('0') << std::setw(2) << std::hex << unsigned(i);
     std::string s = ss.str();
 
     std::transform(s.begin(), s.end(), s.begin(), ::toupper);
