@@ -12,14 +12,22 @@ sudo make install
 
 # dependencies
 
-- cpp-linenoise 
-- boost program_options
+- boost system (required)
+- boost program_options (optional, for example programs)
+- cpp-linenoise (optional, for example program ell_interactive. downloaded by cmake)
 
 # how to use
 two example programs are provided
 
-## ell_rot
-which moves a single connected
+## ell_move
+which moves a single rotation mount or linear stage connected via one controller.
+```
+./ell_move -d <controller_tty_path> -m <device_id> -p <position in deg/mm>
+```
+e.g., to rotate an ELL14K with ID 2 to 90º
+```
+./ell_move -d /dev/ttyUSB0 -m 2 -p 90
+```
 
 ## ell_interactive
 which provides an interactive prompt that lets you control Elliptec devices connected at a single serial port.
