@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
    project(elliptecpp VERSION 0.1 DESCRIPTION "C++ Thorlabs elliptec library")
    include(ExternalProject)
+   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
    
    set(default_build_type "Release")
       if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -44,41 +47,30 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
       set(CMAKE_CXX_FLAGS_RELEASE "-Werror -pipe -O3 -fPIC -march=native -ipo -fomit-frame-pointer -fno-signaling-nans -fno-trapping-math -ftree-vectorize")
    endif()
    
-   set(CPPLINENOISE_INSTALL_LOCATION ${CMAKE_BINARY_DIR})
-   ExternalProject_Add(cpplinenoise
-   PREFIX ${CMAKE_BINARY_DIR}/ext
-    GIT_REPOSITORY https://github.com/yhirose/cpp-linenoise
-    UPDATE_COMMAND ${GIT_EXECUTABLE} pull
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    LOG_DOWNLOAD ON
-    )
-   include_directories(${CMAKE_BINARY_DIR}/ext/src/cpplinenoise)
-   message(${CMAKE_BINARY_DIR}/ext/src/cpplinenoise)
-   find_package(Boost 1.70 REQUIRED COMPONENTS system program_options)
+   
+   find_package(Boost 1.70 REQUIRED COMPONENTS system OPTIONAL_COMPONENTS program_options)
    find_package(Git REQUIRED)
-
-   add_library(elliptecpp SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp src/boost_serial.cpp)
-   add_executable(ell_rot src/ell_rot.cpp)
-   add_executable(ell_interactive src/ell_interactive.cpp)
-   add_dependencies(ell_interactive cpplinenoise)
+   
+   option(BUILD_EXAMPLES "Build all example programs" ON)
+   if (BUILD_EXAMPLES)
+      add_subdirectory(src/examples)
+   endif(BUILD_EXAMPLES)
 
    
+   add_library(elliptecpp SHARED src/ell.cpp src/ell_util.cpp src/ell_comm.cpp src/boost_serial.cpp)
+
    set_target_properties(elliptecpp PROPERTIES VERSION ${PROJECT_VERSION})
    set_target_properties(elliptecpp PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
    set_target_properties(elliptecpp PROPERTIES PUBLIC_HEADER include/elliptec.h)
-   set_property(TARGET elliptecpp PROPERTY CXX_STANDARD 20)
-   set_property(TARGET ell_rot PROPERTY CXX_STANDARD 20)
-   set_property(TARGET ell_interactive PROPERTY CXX_STANDARD 20)
+   set_target_properties(elliptecpp PROPERTIES PUBLIC_HEADER include/elliptec.h)
    
-   target_link_libraries(ell_rot ${Boost_LIBRARIES} elliptecpp)
-   target_link_libraries(ell_interactive ${Boost_LIBRARIES} elliptecpp)
+   set_target_properties(elliptecpp PROPERTIES 
+                                    CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+                                    CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+                                    CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
    
    target_include_directories(elliptecpp PRIVATE include)
    target_include_directories(elliptecpp PRIVATE src)
-   target_include_directories(ell_rot PUBLIC ${Boost_INCLUDE_DIR})
-   target_include_directories(ell_interactive PUBLIC ${Boost_INCLUDE_DIR})
    
    include(GNUInstallDirs)
    
@@ -99,8 +91,6 @@ cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
    if( hasipo )
       message(STATUS "IPO / LTO enabled")
       set_property(TARGET elliptecpp PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-      set_property(TARGET ell_rot PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-      set_property(TARGET ell_interactive PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
    else()
       message(STATUS "IPO / LTO not supported: <${error}>")
    endif()

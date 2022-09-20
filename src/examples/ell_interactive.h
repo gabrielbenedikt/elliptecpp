@@ -1,4 +1,4 @@
-#include "../include/elliptec.h"
+#include "elliptec.h"
 #include "linenoise.hpp"
 #include <vector>
 
