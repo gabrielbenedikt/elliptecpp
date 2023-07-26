@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv) {
     std::string devname = "";
-    uint mnum = 0;
+    std::vector<uint> mnum = std::vector<uint>(0);
     
     /*
      * parse arguments
@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
         args.add_options()
             ("help,h", "prints this message")
             ("device-path,d", bpo::value<std::string>(), "elliptec controller device path")
-            ("motor-id,i", bpo::value<uint>()->default_value(0), "motor ids connected to controller")
+            ("motor-id,i", bpo::value<std::vector<uint>>()->multitoken(), "motor ids connected to controller")
             ;
         
         bpo::options_description cmdline_options;
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         if (vm.count("motor-id")) {
-            mnum = (uint)vm["motor-id"].as< uint >();
+            mnum = (std::vector<uint>)vm["motor-id"].as< std::vector<uint >>();
         } else {
             std::cout << "no motor id specified.\n";
             return 1;
@@ -53,7 +53,10 @@ int main(int argc, char **argv) {
         std::cerr << "Exception of unknown type!\n";
         return 1;
     }
-    std::vector<uint8_t> mnumvec(1,mnum);
+    std::vector<uint8_t> mnumvec;
+    for (auto mn: mnum) {
+        mnumvec.push_back(mn);
+    }
     
     elliptec dev = elliptec(devname, mnumvec, true, true);
     
