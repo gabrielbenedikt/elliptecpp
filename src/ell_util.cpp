@@ -6,7 +6,7 @@
  *
  *****************************************/
 std::string elliptec::int2addr(uint8_t id) {
-    char hexstring[] = {'0', '0'};
+    char hexstring[] = {'0', '0', '0'};
     sprintf(hexstring, "%X", id);
     std::string s = std::string(hexstring);
     return s;
