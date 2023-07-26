@@ -29,5 +29,9 @@ CTestTestfile.cmake
 
 
 build/
+ext/
+lib/
 .kateproject
 README.md.backup
+vec.opt
+elliptecpp.pc
